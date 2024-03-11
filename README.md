@@ -1,1 +1,155 @@
 # student-management-system-
+import java.sql.*;
+public class Main {
+    static String url = "jdbc:mysql://localhost:3306/hem";
+    static String username = "root";
+    static String password = "3429";
+
+    public static void main(String[] args) throws ClassNotFoundException, SQLException {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            System.out.println("Driver Loading Successfully....");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        try {
+            Connection connection = DriverManager.getConnection(url, username, password);
+            System.out.println("Connection Loading Successfully...");
+            while (true) {
+                System.out.println("1.Add Student Detail.");
+                System.out.println("2.Remove The Student.");
+                System.out.println("3.Display The All Students Detail.");
+                System.out.println("4.Search The Student Detail.");
+                System.out.println("5.Exit.");
+                System.out.println("Please Enter The Correct Choice");
+                Scanner scanner = new Scanner(System.in);
+                int choice;
+                choice = scanner.nextInt();
+                switch (choice) {
+                    case 1:
+                        Add_Student_Detail(connection, scanner);
+                        break;
+
+                    case 2:
+                        Remove_Student(connection, scanner);
+                        break;
+
+                    case 3:Display_all_student(connection,scanner);
+                    break;
+
+                    case 4:Search_Student_Detail(connection,scanner);
+                    break;
+
+                    case 5:Exit(connection,scanner);
+                    break;
+
+                    default:System.out.println("Please Enter The Correct Choice.");
+                }
+
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void Add_Student_Detail(Connection connection, Scanner scanner) throws SQLException {
+        String query = "insert into student (student_roll_number, student_name, student_address, student_grade) values(?,?,?,?)";
+        try {
+            System.out.println("Please Enter Roll Number:");
+            int student_roll_number = scanner.nextInt();
+
+            System.out.println("Please Enter Your Name:");
+            String student_name = scanner.next();
+
+            System.out.println("Please Enter Your Address");
+            String student_address = scanner.next();
+
+            System.out.println("Please Enter Your Grade");
+            String student_grade = scanner.next();
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, student_roll_number);
+            preparedStatement.setString(2, student_name);
+            preparedStatement.setString(3, student_address);
+            preparedStatement.setString(4, student_grade);
+
+            int result = preparedStatement.executeUpdate();
+            if (result > 0) {
+                System.out.println("Successfully Data Store In Database..");
+            } else {
+                System.out.println("Not Store Data In Database.");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+        }
+
+    }
+
+    public static void Remove_Student(Connection connection, Scanner scanner) throws SQLException, ClassNotFoundException {
+        String query = "delete from student where student_roll_number=?";
+        System.out.println("Please Enter Your Roll_number:");
+        int student_roll_number;
+        student_roll_number = scanner.nextInt();
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setInt(1, student_roll_number);
+        int result = preparedStatement.executeUpdate();
+        if (result > 0) {
+            System.out.println("Successfully Data Delete From The Database");
+        } else {
+            System.out.println("Data Not Delete From The Database");
+        }
+    }
+
+    public static void Display_all_student(Connection connection, Scanner scanner) throws SQLException, ClassNotFoundException {
+        String query = "select*from student";
+        Statement statement = connection.createStatement();
+        ResultSet rs = statement.executeQuery(query);
+        while (rs.next()) {
+            int student_roll_number = rs.getInt("student_roll_number");
+            String student_name = rs.getString("student_name");
+            String student_address = rs.getString("student_address");
+            String student_grade = rs.getString("student_grade");
+
+            System.out.println("Print All Detail Related Student:");
+            System.out.println("Student_Roll_Number:- " + student_roll_number);
+            System.out.println("Name:- " + student_name);
+            System.out.println("Student_Address:- " + student_address);
+            System.out.println("Student_Grade:- " + student_grade);
+        }
+    }
+    public static void Search_Student_Detail(Connection connection, Scanner scanner) throws SQLException {
+        String sql = "SELECT * FROM student WHERE student_roll_number = ?";
+        try {
+            System.out.println("Please Enter Roll Number:");
+            int student_roll_number = scanner.nextInt();
+
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, student_roll_number);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                int rollNumber = resultSet.getInt("student_roll_number");
+                String name = resultSet.getString("student_name");
+                String address = resultSet.getString("student_address");
+                String grade = resultSet.getString("student_grade");
+
+                System.out.println("Student Found The Data From The Database:");
+                System.out.println("Roll Number:- " + rollNumber);
+                System.out.println("Name:- " + name);
+                System.out.println("Address:- " + address);
+                System.out.println("Grade:- " + grade);
+            } else {
+                System.out.println("Student with roll number " + student_roll_number + " not found.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public static void Exit(Connection connection,Scanner scanner)throws SQLException,ClassNotFoundException{
+        System.out.println("Please Visit Again Our Application..");
+    }
+
+}
